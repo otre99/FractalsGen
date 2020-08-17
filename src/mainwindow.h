@@ -18,9 +18,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_spinBoxMaxIters_valueChanged(int arg1);
     void on_doubleSpinBoxMaxNorm_valueChanged(double arg1);
-    void on_spinBoxN_valueChanged(int arg1);
     void on_lineEditCx_textEdited(const QString &arg1);
     void on_lineEditCy_textEdited(const QString &arg1);
     void Render();
@@ -41,6 +39,13 @@ private slots:
     void on_lineEditOrbitX_textEdited(const QString &arg1);
     void on_lineEditOrbitY_textEdited(const QString &arg1);
     void on_comboBoxOrbitType_activated(int index);
+    void on_pushButtonAdjust_clicked();
+    void on_lineEditQy_textEdited(const QString &arg1);
+    void on_comboBoxFamily_activated(int index);
+    void on_comboBoxFamily_currentIndexChanged(int index);
+    void on_spinBoxN_valueChanged(int arg1);
+    void on_spinBoxMaxIters_valueChanged(int arg1);
+    void on_checkBoxRegionSelection_clicked(bool checked);
 
 private:
     void SaveRelevantParameters(QString &path);

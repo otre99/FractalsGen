@@ -50,34 +50,16 @@
 
 #ifndef RENDERTHREAD_H
 #define RENDERTHREAD_H
-
 #include <QMutex>
-#include <QSize>
 #include <QThread>
 #include <QWaitCondition>
 #include <QRectF>
-#include <complex>
-#include <QFile>
-#include <QDataStream>
-#include "qcustomplot.h"
+
 
 QT_BEGIN_NAMESPACE
 class QImage;
 QT_END_NAMESPACE
-
-struct FractalParameters {
-    int n;
-    int max_iterations;
-    double max_norm;
-    QSize image_size;
-    QRectF area;
-    std::complex<double> c;
-    std::complex<double> q;
-    std::complex<double> orbit_pt;
-    bool cplane;
-    int couloring_model;
-    int orbit_mode;
-};
+#include "fractals.h"
 
 
 class RenderThread : public QThread
@@ -92,17 +74,14 @@ public:
 signals:
     void renderedImage(const QVector<float> &data, const QRectF &area, int cols);
 
-
 protected:
     void run() override;
 
 private:
     QVector<float> GenImage(const FractalParameters &params);
-
     int curr_fractal_;
     QSize curr_size_;
     QRectF curr_area_;
-
     QMutex mutex;
     QWaitCondition condition;
     bool restart = false;

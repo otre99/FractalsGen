@@ -17,6 +17,23 @@
    <property name="focusPolicy">
     <enum>Qt::StrongFocus</enum>
    </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <property name="spacing">
+     <number>2</number>
+    </property>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -82,7 +99,7 @@
              </sizepolicy>
             </property>
             <property name="currentIndex">
-             <number>11</number>
+             <number>8</number>
             </property>
             <item>
              <property name="text">
@@ -186,14 +203,17 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
             <property name="maximum">
-             <number>6</number>
+             <number>16</number>
             </property>
             <property name="singleStep">
              <number>1</number>
             </property>
             <property name="value">
-             <number>2</number>
+             <number>3</number>
             </property>
            </widget>
           </item>
@@ -274,7 +294,7 @@
           <item>
            <widget class="QLabel" name="label_7">
             <property name="text">
-             <string>Q:</string>
+             <string>Qx:</string>
             </property>
            </widget>
           </item>
@@ -287,7 +307,21 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>-0.064</string>
+             <string>0.0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Qy:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEditQy">
+            <property name="text">
+             <string>-0.1</string>
             </property>
            </widget>
           </item>
@@ -324,12 +358,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Fast Render (300x300)</string>
+              <string>Fast Render (x2)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Very Fast Render (100x100) </string>
+              <string>Very Fast Render (x3) </string>
              </property>
             </item>
            </widget>
@@ -339,6 +373,41 @@
             <property name="text">
              <string>Mandelbrot</string>
             </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxFamily">
+            <property name="currentIndex">
+             <number>4</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Family00</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Family01</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Family02</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Family03</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Family04</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -347,6 +416,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <widget class="QComboBox" name="comboBoxCouloring">
+            <property name="currentIndex">
+             <number>2</number>
+            </property>
             <item>
              <property name="text">
               <string>escape vel.</string>
@@ -378,6 +450,13 @@
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonAdjust">
+            <property name="text">
+             <string>Box home [-2,-2,2,2]</string>
             </property>
            </widget>
           </item>
@@ -415,34 +494,82 @@
           </item>
           <item>
            <widget class="QComboBox" name="comboBoxOrbitType">
+            <property name="currentIndex">
+             <number>8</number>
+            </property>
             <item>
              <property name="text">
-              <string>Point</string>
+              <string>x^2+y^2</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Re. line</string>
+              <string>|x|</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Im. line</string>
+              <string>|y|</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Box</string>
+              <string>|x*y|</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Circle</string>
+              <string>x^2+y^2-2*x*y</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Line</string>
+              <string>x^2+y^2+2*x*y</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x^2+y^2+|2*x*y|</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>x^2+y^2-|2*x*y|</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Min(|x|,|y|)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Max(|x|,|y|)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Line Dist.</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>|x-y|</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>|x+y|</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>|x|+|y|</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>|x|-|y|</string>
              </property>
             </item>
            </widget>
@@ -505,6 +632,87 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxRegionSelection">
+       <property name="text">
+        <string>Region selection</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelFunction">
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="PlaceholderText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="128">
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="PlaceholderText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="128">
+             <red>0</red>
+             <green>0</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="127">
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="PlaceholderText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="128">
+             <red>231</red>
+             <green>231</green>
+             <blue>231</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="verticalSpacer">

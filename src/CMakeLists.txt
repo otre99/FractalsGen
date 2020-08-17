@@ -24,7 +24,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS DataVisualization REQUIRED)
 find_package(Qt5 COMPONENTS PrintSupport REQUIRED)
 
-add_executable(Fractals
+add_executable(${CMAKE_PROJECT_NAME}
     main.cpp
     mainwindow.cpp
     mainwindow.h
@@ -34,8 +34,14 @@ add_executable(Fractals
     qcustomplot.cpp
     selectoutputimagesizedialog.cpp
     selectoutputimagesizedialog.ui
-    juliatset.cpp
+    family00.cpp
+    family01.cpp
+    family02.cpp
+    family03.cpp
+    family04.cpp
     doubleslider.cpp
+    fractals.h
+    fractal.cpp
     )
 
-target_link_libraries(Fractals PRIVATE Qt5::Widgets Qt5::PrintSupport -pthread PUBLIC OpenMP::OpenMP_CXX)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt5::Widgets Qt5::PrintSupport -pthread PUBLIC OpenMP::OpenMP_CXX)

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include "selectoutputimagesizedialog.h"
-#include "juliatset.h"
+#include "fractals.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 
@@ -20,45 +20,26 @@ struct FullImageRender {
     FractalParameters *params;
 
     void Render(){
-        JuliaSet jset;
-        jset.Init(params->c, params->q.real(), params->max_norm, params->max_iterations, params->n);
-        jset.SetOrbitPt(params->orbit_pt, params->orbit_mode);
+        auto jset = SelectFractal(*params);
+        std::function<float (const cmplx &z)> f = jset->GetCouloringFunction(params->cplane, params->couloring_mode);
 
-        const long double dx = params->area.width()/img->width();
-        const long double dy = params->area.height()/img->height();
-        const long double x0 = params->area.x()+0.5*dx;
-        const long double y0 = params->area.y()+0.5*dy;
+        const dbltype dx = params->area.width()/img->width();
+        const dbltype dy = params->area.height()/img->height();
+        const dbltype x0 = params->area.x()+0.5*dx;
+        const dbltype y0 = params->area.y()+0.5*dy;
         const size_t N =  img->width()*img->height();
         auto data = reinterpret_cast<QRgb*>(img->bits());
 
-
-        std::function<float (cmplx z)> f;
-        switch (params->couloring_model) {
-        case 0:
-            f = params->cplane ? std::bind(&JuliaSet::CalcEscapeMandelbrot, &jset, std::placeholders::_1) : std::bind(&JuliaSet::CalcEscapeJulia, &jset, std::placeholders::_1);
-            break;
-        case 1:
-            f = params->cplane ? std::bind(&JuliaSet::CalcEscapeMandelbrotSmoth, &jset, std::placeholders::_1) : std::bind(&JuliaSet::CalcEscapeJuliaSmoth, &jset, std::placeholders::_1);
-            break;
-        case 2:
-            f = params->cplane ? std::bind(&JuliaSet::CalcFinalNormMandelbrot, &jset, std::placeholders::_1) : std::bind(&JuliaSet::CalcFinalNormJulia, &jset, std::placeholders::_1);
-            break;
-        default:
-            qDebug() << "Unknow couloring mode";
-            return;
-        }
-
-
+        const size_t H = img->height()-1;
 #pragma omp parallel for
         for (size_t i=0; i<N; ++i){
-
             if (abort){
                 continue;
             }
-            const int rows = i/img->width();
+            const int rows = H-i/img->width();
             const int cols = i%img->width();
-            long double y = y0 + rows*dy;
-            long double x = x0 + cols*dx;
+            dbltype y = y0 + rows*dy;
+            dbltype x = x0 + cols*dx;
 
             cmplx z(x,y);
             const float niters = f(z);
@@ -91,25 +72,28 @@ MainWindow::MainWindow(QWidget *parent)
     name2gp["Hues"] = QCPColorGradient::gpHues;
 
 
-    fparams_.couloring_model=ui->comboBoxCouloring->currentIndex();
+    fparams_.couloring_mode=ui->comboBoxCouloring->currentIndex();
     fparams_.max_iterations = ui->spinBoxMaxIters->value();
     fparams_.n = ui->spinBoxN->value();
     fparams_.max_norm = ui->doubleSpinBoxMaxNorm->value();
     fparams_.cplane   = ui->checkBoxMandelbrot->isChecked();
+    fparams_.orbit_mode = ui->comboBoxOrbitType->currentIndex();
+    fparams_.fractal_family = ui->comboBoxFamily->currentIndex();
+    fparams_.c.real(ui->lineEditCx->text().toDouble());  fparams_.c.imag(ui->lineEditCy->text().toDouble());
+    fparams_.q.real(ui->lineEditQx->text().toDouble());  fparams_.q.imag(ui->lineEditQy->text().toDouble());
 
-    on_lineEditCx_textEdited(ui->lineEditCx->text());
-    on_lineEditCy_textEdited(ui->lineEditCy->text());
-    on_lineEditQx_textEdited(ui->lineEditQx->text());
-    on_comboBoxCMaps_activated(ui->comboBoxCMaps->currentText());
-
+    /*color map*/
+    QCPColorGradient grad(name2gp[ui->comboBoxCMaps->currentText()]);
+    if (ui->checkBoxInverted->isChecked()){
+        grad = grad.inverted();
+    }
+    grad.setPeriodic(ui->checkBoxPeriod->isChecked());
+    m_color_map->setGradient(grad);
+    m_color_map->colorScale()->setDataScaleType( ui->checkBoxLog->isChecked() ? QCPAxis::stLogarithmic : QCPAxis::stLinear);
 
     QObject::connect(m_custom_plot, &QCustomPlot::afterReplot, this, &MainWindow::Render);
     QObject::connect(&rthread_, &RenderThread::renderedImage, this, &MainWindow::RenderedData);
     update_from_saved_data_ = false;
-
-    ui->horizontalSliderHi->SetRange(0,1000);
-    ui->horizontalSliderHi->SetValueDouble(1000);
-    ui->horizontalSliderLo->SetRange(0,1000);
 }
 
 void MainWindow::Render()
@@ -118,6 +102,11 @@ void MainWindow::Render()
     auto yR = m_custom_plot->yAxis->range();
 
     if (xR != last_XR_ || yR != last_YR_) {
+
+        if (ui->checkBoxRegionSelection->isChecked()){
+            ui->checkBoxRegionSelection->setChecked(false);
+            on_checkBoxRegionSelection_clicked(false);
+        }
         fparams_.area = QRectF(QPointF{xR.lower,yR.lower}, QPointF{xR.upper, yR.upper});
         fparams_.image_size = GetRenderImageSize();
         RenderCommand(9);
@@ -130,13 +119,16 @@ QSize MainWindow::GetRenderImageSize()
 {
     switch (ui->comboBoxRanderModel->currentIndex()) {
     case 0:
+        m_color_map->setInterpolate(false);
         return m_custom_plot->axisRect(0)->size();
         break;
     case 1:
-        return {300,300};
+        m_color_map->setInterpolate(true);
+        return size()/2;
         break;
     case 2:
-        return {100,100};
+        m_color_map->setInterpolate(true);
+        return size()/3;
         break;
     default:
         return m_custom_plot->axisRect(0)->size();
@@ -155,13 +147,6 @@ void MainWindow::RenderCommand(int tt)
     rthread_.render(fparams_);
 }
 
-void MainWindow::on_spinBoxMaxIters_valueChanged(int arg1)
-{
-    fparams_.max_iterations = arg1;
-    ui->horizontalSliderHi->SetMaximunDouble(arg1);
-    ui->horizontalSliderLo->SetMaximunDouble(arg1);
-    RenderCommand(3);
-}
 
 void MainWindow::on_doubleSpinBoxMaxNorm_valueChanged(double arg1)
 {
@@ -169,10 +154,6 @@ void MainWindow::on_doubleSpinBoxMaxNorm_valueChanged(double arg1)
     RenderCommand(4);
 }
 
-void MainWindow::on_spinBoxN_valueChanged(int arg1)
-{
-    fparams_.n = arg1;
-}
 
 void MainWindow::on_lineEditCx_textEdited(const QString &arg1)
 {
@@ -191,8 +172,8 @@ void MainWindow::on_lineEditCy_textEdited(const QString &arg1)
 
 void MainWindow::SetupColorMapPlot(QCustomPlot *customPlot)
 {
-    customPlot->setInteractions(
-                QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the
+    customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom); // this will also allow rescaling the
+
     // color scale by dragging/zooming
     customPlot->axisRect()->setupFullAxesBox(true);
     customPlot->xAxis->setLabel("x");
@@ -202,18 +183,16 @@ void MainWindow::SetupColorMapPlot(QCustomPlot *customPlot)
     m_color_map->data()->setRange(QCPRange(-2, 2), QCPRange(-2, 2));
 
     auto *colorScale = new QCPColorScale(customPlot);
-    customPlot->plotLayout()->addElement(
-                0, 1, colorScale); // add it to the right of the main axis rect
-    colorScale->setType(
-                QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels
+    customPlot->plotLayout()->addElement(0, 1, colorScale); // add it to the right of the main axis rect
+    colorScale->setType(QCPAxis::atRight); // scale shall be vertical bar with tick/axis labels
     // right (actually atRight is already the default)
-    m_color_map->setColorScale(
-                colorScale); // associate the color map with the color scale
+    m_color_map->setColorScale(colorScale); // associate the color map with the color scale
+
+
 
     m_color_map->setGradient(QCPColorGradient::gpGrayscale);
     auto *marginGroup = new QCPMarginGroup(customPlot);
-    customPlot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop,
-                                           marginGroup);
+    customPlot->axisRect()->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
     colorScale->setMarginGroup(QCP::msBottom | QCP::msTop, marginGroup);
     m_color_map->setDataRange(QCPRange(1, 500));
     m_custom_plot->rescaleAxes();
@@ -257,7 +236,6 @@ void MainWindow::on_pushButtonRescale_clicked()
     const auto r = m_color_map->dataRange();
     ui->horizontalSliderLo->SetRange(r.lower, r.upper);
     ui->horizontalSliderHi->SetRange(r.lower, r.upper);
-
 }
 
 
@@ -280,14 +258,11 @@ void MainWindow::on_checkBoxPeriod_clicked()
     on_comboBoxCMaps_activated(ui->comboBoxCMaps->currentText());
 }
 
-
-
 void MainWindow::on_pushButtonSaveParams_clicked()
 {
     QString path = QFileDialog::getSaveFileName(this);
     if (path.isEmpty()) return;
     SaveRelevantParameters(path);
-
 }
 
 void MainWindow::on_comboBoxCMaps_activated(const QString &arg1)
@@ -304,8 +279,8 @@ void MainWindow::on_comboBoxCMaps_activated(const QString &arg1)
 
 void MainWindow::on_comboBoxRanderModel_activated(int index)
 {
-    fparams_.image_size = GetRenderImageSize();
-    if (index==0){
+    if (fparams_.image_size != GetRenderImageSize()){
+        fparams_.image_size = GetRenderImageSize();
         RenderCommand(1);
     }
 }
@@ -336,9 +311,9 @@ void MainWindow::SaveRelevantParameters(QString &path)
     // colors
     out << ui->comboBoxCMaps->currentIndex() << ui->checkBoxLog->isChecked() << ui->checkBoxPeriod->isChecked();
     out << m_color_map->dataRange().lower << m_color_map->dataRange().upper;
-    out << fparams_.couloring_model;
-
+    out << fparams_.couloring_mode;
     out << fparams_.orbit_pt.real( ) << fparams_.orbit_pt.imag() << fparams_.orbit_mode;
+    out << fparams_.fractal_family;
 }
 
 void MainWindow::LoadRelevantParameters(QString &path)
@@ -351,6 +326,18 @@ void MainWindow::LoadRelevantParameters(QString &path)
     in >> fparams_.n;
     in >> fparams_.max_iterations;
     in >> fparams_.max_norm;
+
+    ui->spinBoxN->blockSignals(true);
+    ui->spinBoxMaxIters->blockSignals(true);
+    ui->doubleSpinBoxMaxNorm->blockSignals(true);
+    ui->spinBoxN->setValue(fparams_.n);
+    ui->spinBoxMaxIters->setValue(fparams_.max_iterations);
+    ui->doubleSpinBoxMaxNorm->setValue(fparams_.max_norm);
+    ui->spinBoxN->blockSignals(false);
+    ui->spinBoxMaxIters->blockSignals(false);
+    ui->doubleSpinBoxMaxNorm->blockSignals(false);
+
+
     in >> fparams_.image_size;
     in >> fparams_.area;
     in >> cx >> cy >> qx >> qy >> fparams_.cplane;
@@ -361,6 +348,7 @@ void MainWindow::LoadRelevantParameters(QString &path)
     fparams_.c.real(cx); ui->lineEditCx->setText(QString::number(cx));
     fparams_.c.imag(cy); ui->lineEditCy->setText(QString::number(cy));
     fparams_.q.real(qx); ui->lineEditQx->setText(QString::number(qx));
+    fparams_.q.imag(qy); ui->lineEditQy->setText(QString::number(qy));
 
 
 
@@ -378,8 +366,8 @@ void MainWindow::LoadRelevantParameters(QString &path)
     ui->horizontalSliderHi->SetValueDouble(maxV);
     m_color_map->setDataRange(QCPRange(minV, maxV));
 
-    in >> fparams_.couloring_model;
-    ui->comboBoxCouloring->setCurrentIndex(fparams_.couloring_model);
+    in >> fparams_.couloring_mode;
+    ui->comboBoxCouloring->setCurrentIndex(fparams_.couloring_mode);
 
     in >> cx >> cy;
     fparams_.orbit_pt.real(cx); ui->lineEditOrbitX->setText(QString::number(cx));
@@ -387,6 +375,9 @@ void MainWindow::LoadRelevantParameters(QString &path)
 
     in >> fparams_.orbit_mode;
     ui->comboBoxOrbitType->setCurrentIndex(fparams_.orbit_mode);
+
+    in >> fparams_.fractal_family;
+    ui->comboBoxFamily->setCurrentIndex(fparams_.fractal_family);
 }
 
 void MainWindow::on_horizontalSliderHi_doubleValueMoved(double val)
@@ -456,7 +447,7 @@ void MainWindow::on_checkBoxInverted_clicked()
 
 void MainWindow::on_comboBoxCouloring_activated(int index)
 {
-    fparams_.couloring_model = index;
+    fparams_.couloring_mode = index;
     RenderCommand(0);
 }
 
@@ -478,4 +469,64 @@ void MainWindow::on_comboBoxOrbitType_activated(int index)
 {
     fparams_.orbit_mode = index;
     RenderCommand(0);
+}
+
+void MainWindow::on_pushButtonAdjust_clicked()
+{
+    m_color_map->data()->setRange(QCPRange(-2, 2), QCPRange(-2, 2));
+    fparams_.area.setCoords(-2,-2,2,2);
+    update_from_saved_data_=true;
+    RenderCommand(0);
+}
+
+void MainWindow::on_lineEditQy_textEdited(const QString &arg1)
+{
+    double xx = arg1.toDouble();
+    fparams_.q.imag(xx);
+    RenderCommand(6);
+}
+
+void MainWindow::on_comboBoxFamily_activated(int index)
+{
+    fparams_.fractal_family = index;
+    RenderCommand(0);
+}
+
+void MainWindow::on_comboBoxFamily_currentIndexChanged(int index)
+{
+    switch (index) {
+    case 0: ui->labelFunction->setText(" Z -> Z^2( 1+Re(Q)Z^2 )/( 1-Re(Q)Z^2 )+C");  break;
+    case 1: ui->labelFunction->setText(" Z -> Z^2+C"); break;
+    case 2: ui->labelFunction->setText(" Z -> Z^n+C"); break;
+    case 3: ui->labelFunction->setText(" Z -> Z - ( Z^n + C )/( nZ^(n-1) )"); break;
+    case 4: ui->labelFunction->setText(" Z -> Z - ( Z^n + QZ + C )/( nZ^(n-1) + Q )"); break;
+    default:
+        break;
+    }
+}
+
+
+void MainWindow::on_spinBoxN_valueChanged(int arg1)
+{
+    fparams_.n = arg1;
+    RenderCommand(3);
+}
+
+void MainWindow::on_spinBoxMaxIters_valueChanged(int arg1)
+{
+    fparams_.max_iterations = arg1;
+    if (ui->comboBoxCouloring->currentIndex()!=2){
+        ui->horizontalSliderHi->SetMaximunDouble(fparams_.max_iterations);
+        ui->horizontalSliderLo->SetMaximunDouble(fparams_.max_iterations);
+    }
+    RenderCommand(4);
+}
+
+void MainWindow::on_checkBoxRegionSelection_clicked(bool checked)
+{
+    if (checked){
+        m_custom_plot->setSelectionRectMode(QCP::srmZoom);
+    } else {
+        m_custom_plot->setSelectionRectMode(QCP::srmNone);
+    }
 }
