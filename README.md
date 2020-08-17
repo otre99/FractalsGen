@@ -34,8 +34,10 @@ Just use QtSDK-5.12.* and open CMakeList.txt with QtCreator tool. It doesn't nee
  - When you get a good image you can save the parameters you used and generate an image at the resolution you want
  
 ## Gallery
-Some examples:
+FractalGen:
+![](./app.png?raw=true "FractalGen") 
 
+Some examples:
 ![](./gallery.png?raw=true "Some examples") 
 
 ## TO DO:
