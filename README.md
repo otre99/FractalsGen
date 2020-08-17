@@ -3,9 +3,11 @@
 This program generates beautiful fractal images using the following functions:
 
 - Family00:
-    ```math
+ 
+    $$
         z = x^2(1+Re(Q)z^2)/(1-Re(Q)z^2) + C
-    ```
+    $$
+
 - Family01:
      ```math
         z = x^2 + C
