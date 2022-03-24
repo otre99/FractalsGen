@@ -21,7 +21,6 @@ if(NOT TARGET OpenMP::OpenMP_CXX)
 endif()
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt5 COMPONENTS DataVisualization REQUIRED)
 find_package(Qt5 COMPONENTS PrintSupport REQUIRED)
 
 add_executable(${CMAKE_PROJECT_NAME}
