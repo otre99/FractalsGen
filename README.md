@@ -35,7 +35,7 @@ Just use QtSDK-5.12.* and open CMakeList.txt with QtCreator tool. It doesn't nee
  
 ## Gallery
 FractalGen:
-![](./app.png?raw=true "FractalGen") 
+![](./app.jpg?raw=true "FractalGen") 
 
 Some examples:
 ![](./sample00.png?raw=true) 
