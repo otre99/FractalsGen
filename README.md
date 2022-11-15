@@ -38,8 +38,9 @@ FractalGen:
 ![](./app.png?raw=true "FractalGen") 
 
 Some examples:
-![](./gallery.png?raw=true "Some examples") 
-
+![](./sample00.png?raw=true) 
+![](./sample01.png?raw=true) 
+![](./sample02.png?raw=true) 
 ## TO DO:
 - Code style refactoring, out there is a mess :) 
 - Add other color maps
