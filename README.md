@@ -37,10 +37,11 @@ FractalGen:
 ![](./app.jpg?raw=true "FractalGen") 
 
 Some examples:
-![](./sample00.png?raw=true) 
-![](./sample01.png?raw=true) 
-![](./sample02.png?raw=true) 
-![](./sample03.png?raw=true) 
+![](./sample00.jpg?raw=true) 
+![](./sample01.jpg?raw=true) 
+![](./sample02.jpg?raw=true) 
+![](./sample03.jpg?raw=true) 
+![](./sample04.jpg?raw=true) 
 
 ## TO DO:
 - Add other color maps
