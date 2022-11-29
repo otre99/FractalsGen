@@ -25,8 +25,7 @@ This program generates beautiful fractal images using the following functions:
 Actually, some functions are special cases of other functions, for example, `Family01` is a special case of the function `Family00` when ```Re(Q) = 0```, this is so for optimization purposes. You can change the different parameters to get very impressive images.
 
 ## How to build de app?
-Just use QtSDK-5.12.* and open CMakeList.txt with QtCreator tool. It doesn't need any external. For visualize the fractal I used QCustomPlot [[here]](https://www.qcustomplot.com/). 
-
+Just use QtSDK-6.4.* and open CMakeList.txt with QtCreator tool. It doesn't need any external. 
 
 ## Tricks:
  - Use mouse button and scroll wheel to navigate
@@ -41,8 +40,8 @@ Some examples:
 ![](./sample00.png?raw=true) 
 ![](./sample01.png?raw=true) 
 ![](./sample02.png?raw=true) 
+![](./sample03.png?raw=true) 
+
 ## TO DO:
-- Code style refactoring, out there is a mess :) 
 - Add other color maps
-- General revision, correction of some bugs
 - Add new fractals
