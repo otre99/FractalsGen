@@ -42,7 +42,8 @@ Some examples:
 ![](./sample02.jpg?raw=true) 
 ![](./sample03.jpg?raw=true) 
 ![](./sample04.jpg?raw=true) 
-
+![](./sample05.jpg?raw=true) 
+![](./sample06.jpg?raw=true) 
 ## TO DO:
 - Add other color maps
 - Add new fractals
