@@ -25,13 +25,25 @@ This program generates beautiful fractal images using the following functions:
 Actually, some functions are special cases of other functions, for example, `Family01` is a special case of the function `Family00` when ```Re(Q) = 0```, this is so for optimization purposes. You can change the different parameters to get very impressive images.
 
 ## How to build de app?
-Just use QtSDK-6.4.* and open CMakeList.txt with QtCreator tool. It doesn't need any external. 
+Just use QtSDK-6.4.* and open [qtapp/CMakeLists.txt](qtapp/CMakeLists.txt) with QtCreator tool. It doesn't need any external. 
 
-## Tricks:
- - Use mouse button and scroll wheel to navigate
- - In most cases the fractal is generated almost in real time. To increase the speed you can select the option `Fast Render` or `Very Fast Render` 
- - When you get a good image you can save the parameters you used and generate an image at the resolution you want
- 
+## plot.py script 
+
+You can save the raw data from the `FractalGen` application and use the [plot.py](./plot.py) script to display the fractal using Matplotlib's palettes.
+```
+usage: plot.py [-h] [--cmap CMAP] [--log] [--save_img SAVE_IMG] fname
+
+positional arguments:
+  fname                Input file
+
+options:
+  -h, --help           show this help message and exit
+  --cmap CMAP          Colormap
+  --log                Use log scale
+  --save_img SAVE_IMG  Save image
+```
+
+
 ## Gallery
 FractalGen:
 ![](./app.jpg?raw=true "FractalGen") 
