@@ -15,33 +15,15 @@ class DisplayWidget : public QWidget {
     QVector<double> data;
     QSize size;
     double minVal, maxVal;
-    QPixmap GenPixmap(ColorMapper &cmap, bool useLog, bool calc_bound = true) {
-      if (data.empty())
-        return {};
-      if (calc_bound) {
-        minVal = std::numeric_limits<double>::max();
-        maxVal = std::numeric_limits<double>::min();
-        for (const auto &v : data) {
-          minVal = std::min(minVal, v);
-          maxVal = std::max(maxVal, v);
-        }
-      }
-      QImage image(size, QImage::Format_ARGB32);
-      int dim = size.width();
-      for (int i = 0; i < image.height(); ++i) {
-        cmap.colorize(data.data() + i * dim, minVal, maxVal,
-                      reinterpret_cast<QRgb *>(image.scanLine(i)), dim, 1,
-                      useLog);
-      }
-      return QPixmap::fromImage(image);
-    }
+    QPixmap GenPixmap(ColorMapper &cmap, bool useLog, bool calc_bound = true,
+                      double offset = 0.0);
 
   } imgData;
 
-public:
+ public:
   DisplayWidget(QWidget *parent = nullptr);
 
-protected:
+ protected:
   void paintEvent(QPaintEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;
@@ -53,38 +35,28 @@ protected:
   void mouseReleaseEvent(QMouseEvent *event) override;
   void Reset();
 
-  void setLogScale(bool enable) {
-    if (useLog == enable)
-      return;
-    useLog = enable;
-    pixmap = imgData.GenPixmap(colorMapper, useLog, false);
-    update();
-  }
-
-  void setColorMap(ColorMapper::GradientPreset p) {
-    if (p == colorMapper.preset())
-      return;
-    colorMapper = ColorMapper(p);
-    pixmap = imgData.GenPixmap(colorMapper, useLog, false);
-    update();
-  }
-
-  double x1() const { return centerX-width()*curScale;}
-  double y1() const { return centerY-height()*curScale;}
-  double x2() const { return centerX+width()*curScale;}
-  double y2() const { return centerY+height()*curScale;}
-
+  void setLogScale(bool enable);
+  void setColorMap(ColorMapper::GradientPreset p);
+  void invertColorMap();
+  void setColorMapOffset(const double &offset);
+  double x1() const { return centerX - width() * curScale; }
+  double y1() const { return centerY - height() * curScale; }
+  double x2() const { return centerX + width() * curScale; }
+  double y2() const { return centerY + height() * curScale; }
+  ColorMapper *colorMap() { return &colorMapper; }
+  bool useLogScale() const { return useLog; }
+  bool colorOffset() const { return colorMapOffset; }
 
 #ifndef QT_NO_GESTURES
   bool event(QEvent *event) override;
 #endif
 
-private slots:
+ private slots:
   void updatePixmap(const QVector<double> &data, const QSize &size,
                     double scaleFactor);
   void zoom(double zoomFactor);
 
-private:
+ private:
   void scroll(int deltaX, int deltaY);
 #ifndef QT_NO_GESTURES
   bool gestureEvent(QGestureEvent *event);
@@ -103,7 +75,8 @@ private:
   ColorMapper colorMapper;
   bool useLog{false};
   QString help, info;
+  double colorMapOffset{0.0};
 };
 //! [0]
 
-#endif // DISPLAY_WIDGET_H
+#endif  // DISPLAY_WIDGET_H

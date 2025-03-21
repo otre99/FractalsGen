@@ -1,7 +1,7 @@
-#include "fractals.h"
 #include <functional>
 #include <limits>
-#include <numeric>
+
+#include "fractals.h"
 
 void Family04::Init(const FractalParameters &p) {
   Fractal::Init(p);
@@ -12,33 +12,33 @@ void Family04::Init(const FractalParameters &p) {
   n_ = p.n;
   alpha_ = static_cast<dbltype>(n_ - 1) / n_;
   switch (n_ - 1) {
-  case 1:
-    funct_ = std::bind(Family02::FastPow1Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 2:
-    funct_ = std::bind(Family02::FastPow2Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 3:
-    funct_ = std::bind(Family02::FastPow3Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 4:
-    funct_ = std::bind(Family02::FastPow4Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 5:
-    funct_ = std::bind(Family02::FastPow5Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 6:
-    funct_ = std::bind(Family02::FastPow6Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  default:
-    funct_ = std::bind(Family02::FastPowNInline, std::placeholders::_1,
-                       std::placeholders::_2, n_ - 1);
+    case 1:
+      funct_ = std::bind(Family02::FastPow1Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 2:
+      funct_ = std::bind(Family02::FastPow2Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 3:
+      funct_ = std::bind(Family02::FastPow3Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 4:
+      funct_ = std::bind(Family02::FastPow4Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 5:
+      funct_ = std::bind(Family02::FastPow5Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 6:
+      funct_ = std::bind(Family02::FastPow6Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    default:
+      funct_ = std::bind(Family02::FastPowNInline, std::placeholders::_1,
+                         std::placeholders::_2, n_ - 1);
   }
 }
 
@@ -52,9 +52,9 @@ double Family04::CalcFinalNormMandelbrot(const cmplx &c) const {
   for (; iter < max_iter_; ++iter) {
     x1 = x;
     y1 = y;
-    funct_(x, y); // z^(n-1)
+    funct_(x, y);  // z^(n-1)
     x2 = x1 * x - y1 * y;
-    y2 = x1 * y + y1 * x; // z^n
+    y2 = x1 * y + y1 * x;  // z^n
     // dem
     x = n_ * x + q_.real();
     y = y * n_ + q_.imag();
@@ -67,8 +67,7 @@ double Family04::CalcFinalNormMandelbrot(const cmplx &c) const {
     x = tmp;
     dist = std::min(dist, orbit_metric_funct_(x, y));
     rdem = std::max(std::abs(x1 - x), std::abs(y1 - y));
-    if (rdem < Fractal::kEps)
-      break;
+    if (rdem < Fractal::kEps) break;
   }
   return std::sqrt(dist);
 }
@@ -83,9 +82,9 @@ double Family04::CalcFinalNormJulia(const cmplx &z) const {
   for (; iter < max_iter_; ++iter) {
     x1 = x;
     y1 = y;
-    funct_(x, y); // z^(n-1)
+    funct_(x, y);  // z^(n-1)
     x2 = x1 * x - y1 * y;
-    y2 = x1 * y + y1 * x; // z^n
+    y2 = x1 * y + y1 * x;  // z^n
     // dem
     x = n_ * x + q_.real();
     y = y * n_ + q_.imag();
@@ -98,8 +97,7 @@ double Family04::CalcFinalNormJulia(const cmplx &z) const {
     x = tmp;
     dist = std::min(dist, orbit_metric_funct_(x, y));
     rdem = std::max(std::abs(x1 - x), std::abs(y1 - y));
-    if (rdem < Fractal::kEps)
-      break;
+    if (rdem < Fractal::kEps) break;
   }
   return std::sqrt(dist);
 }
@@ -114,9 +112,9 @@ double Family04::CalcEscapeJulia(const cmplx &z) const {
   for (; iter < max_iter_; ++iter) {
     x1 = x;
     y1 = y;
-    funct_(x, y); // z^(n-1)
+    funct_(x, y);  // z^(n-1)
     x2 = x1 * x - y1 * y;
-    y2 = x1 * y + y1 * x; // z^n
+    y2 = x1 * y + y1 * x;  // z^n
     // dem
     x = n_ * x + q_.real();
     y = y * n_ + q_.imag();
@@ -128,8 +126,7 @@ double Family04::CalcEscapeJulia(const cmplx &z) const {
     y = y1 - (y2 * x - x2 * y) / rdem;
     x = tmp;
     rdem = std::max(std::abs(x1 - x), std::abs(y1 - y));
-    if (rdem < Fractal::kEps)
-      break;
+    if (rdem < Fractal::kEps) break;
   }
   return iter;
 }
@@ -144,9 +141,9 @@ double Family04::CalcEscapeMandelbrot(const cmplx &c) const {
   for (; iter < max_iter_; ++iter) {
     x1 = x;
     y1 = y;
-    funct_(x, y); // z^(n-1)
+    funct_(x, y);  // z^(n-1)
     x2 = x1 * x - y1 * y;
-    y2 = x1 * y + y1 * x; // z^n
+    y2 = x1 * y + y1 * x;  // z^n
     // dem
     x = n_ * x + q_.real();
     y = y * n_ + q_.imag();
@@ -158,8 +155,7 @@ double Family04::CalcEscapeMandelbrot(const cmplx &c) const {
     y = y1 - (y2 * x - x2 * y) / rdem;
     x = tmp;
     rdem = std::max(std::abs(x1 - x), std::abs(y1 - y));
-    if (rdem < Fractal::kEps)
-      break;
+    if (rdem < Fractal::kEps) break;
   }
   return iter;
 }

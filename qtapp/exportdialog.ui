@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>407</width>
+    <width>481</width>
     <height>109</height>
    </rect>
   </property>
@@ -29,7 +29,21 @@
    <property name="spacing">
     <number>2</number>
    </property>
-   <item row="0" column="0">
+   <item row="2" column="0">
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Save Raw</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="pushButtonImage">
+     <property name="text">
+      <string>Save Image</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout">
      <property name="spacing">
       <number>1</number>
@@ -92,7 +106,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <property name="spacing">
       <number>1</number>
@@ -154,16 +168,22 @@
        <property name="text">
         <string>Keep aspect ratio</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxSmoth">
+       <property name="text">
+        <string>Smoth</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>Save</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

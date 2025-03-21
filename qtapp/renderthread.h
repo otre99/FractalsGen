@@ -54,7 +54,6 @@
 #include <QThread>
 #include <QWaitCondition>
 
-
 QT_BEGIN_NAMESPACE
 class QImage;
 QT_END_NAMESPACE
@@ -63,19 +62,19 @@ QT_END_NAMESPACE
 class RenderThread : public QThread {
   Q_OBJECT
 
-public:
+ public:
   RenderThread(QObject *parent = nullptr);
   ~RenderThread();
   void render(const FractalParameters &params);
 
-signals:
+ signals:
   void renderedImage(const QVector<double> &data, const QSize &size,
                      double scale);
 
-protected:
+ protected:
   void run() override;
 
-private:
+ private:
   QMutex mutex;
   QWaitCondition condition;
   bool restart = false;
@@ -89,4 +88,4 @@ private:
   std::vector<int> indexs;
 };
 
-#endif // RENDERTHREAD_H
+#endif  // RENDERTHREAD_H

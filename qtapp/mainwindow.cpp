@@ -1,10 +1,13 @@
 #include "mainwindow.h"
+
+#include <QDebug>
+
 #include "./ui_mainwindow.h"
 #include "display_widget.h"
 #include "exportdialog.h"
-#include <QDebug>
 
-template <typename Type> double GetNumber(Type *l) {
+template <typename Type>
+double GetNumber(Type *l) {
   return l->text().toDouble();
 }
 
@@ -100,25 +103,26 @@ void MainWindow::on_pushButtonResetArea_clicked() { displayWidget->Reset(); }
 
 void MainWindow::on_comboBoxFamily_activated(int index) {
   switch (index) {
-  case 0:
-    ui->labelFamily->setPixmap(QPixmap(":/images/images/family00.jpg"));
-    break;
-  case 1:
-    ui->labelFamily->setPixmap(QPixmap(":/images/images/family01.jpg"));
-    break;
-  case 2:
-    ui->labelFamily->setPixmap(QPixmap(":/images/images/family02.jpg"));
-    break;
-  case 3:
-    ui->labelFamily->setPixmap(QPixmap(":/images/images/family03.jpg"));
-    break;
-  case 4:
-    ui->labelFamily->setPixmap(QPixmap(":/images/images/family04.jpg"));
-    break;
-  default:
-    qErrnoWarning(
-        "Wrong fractal family number. Expected [0,1,2,3,4], but get %d", index);
-    break;
+    case 0:
+      ui->labelFamily->setPixmap(QPixmap(":/images/images/family00.jpg"));
+      break;
+    case 1:
+      ui->labelFamily->setPixmap(QPixmap(":/images/images/family01.jpg"));
+      break;
+    case 2:
+      ui->labelFamily->setPixmap(QPixmap(":/images/images/family02.jpg"));
+      break;
+    case 3:
+      ui->labelFamily->setPixmap(QPixmap(":/images/images/family03.jpg"));
+      break;
+    case 4:
+      ui->labelFamily->setPixmap(QPixmap(":/images/images/family04.jpg"));
+      break;
+    default:
+      qErrnoWarning(
+          "Wrong fractal family number. Expected [0,1,2,3,4], but get %d",
+          index);
+      break;
   }
   displayWidget->fractalParams.fractal_family = index;
   displayWidget->RenderCommand();
@@ -128,6 +132,20 @@ void MainWindow::on_pBSaveRawData_clicked() {
   ExportDialog dlg(this, &(displayWidget->fractalParams));
   dlg.setBBox(displayWidget->x1(), displayWidget->x2(), displayWidget->y1(),
               displayWidget->y2());
+  dlg.setColorMapParameters(displayWidget->colorMap(),
+                            displayWidget->useLogScale(),
+                            displayWidget->colorOffset());
+
   dlg.setBBoxSize(displayWidget->size());
   dlg.exec();
 }
+
+void MainWindow::on_horizontalSlider_valueChanged(int value) {
+  displayWidget->setColorMapOffset(value / 1000.0);
+}
+
+void MainWindow::on_checkBoxInvert_clicked(bool checked)
+{
+    displayWidget->invertColorMap();
+}
+

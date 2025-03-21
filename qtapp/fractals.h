@@ -30,11 +30,10 @@ struct FractalParameters {
 };
 
 class Fractal {
+ public:
+    static std::unique_ptr<Fractal> Create(const FractalParameters *params);
 
-public:
-    static std::unique_ptr<Fractal> Create(FractalParameters *params);
-
-protected:
+ protected:
   cmplx orbit_pt_;
   dbltype th_norm_;
   dbltype radius_;
@@ -109,7 +108,7 @@ protected:
 
   //   |Line|
   dbltype OrbitDiscance10(const dbltype &x, const dbltype &y) const {
-    return std::abs(y - orbit_tangle_ * x); /// orbit_dem_;
+    return std::abs(y - orbit_tangle_ * x);  /// orbit_dem_;
   }
 
   //   |yy-xx|
@@ -139,17 +138,17 @@ protected:
     dbltype yy = orbit_pt_.imag() - y;
     return std::abs(std::abs(yy) - std::abs(xx));
   }
-  std::function<dbltype(const dbltype &, const dbltype &)>
-  GetOrbitMetric(const FractalParameters &f) const;
+  std::function<dbltype(const dbltype &, const dbltype &)> GetOrbitMetric(
+      const FractalParameters &f) const;
 
-public:
+ public:
   virtual void Init(const FractalParameters &p);
   virtual double CalcEscapeJulia(const cmplx &z) const = 0;
   virtual double CalcEscapeMandelbrot(const cmplx &c) const = 0;
   virtual double CalcFinalNormJulia(const cmplx &z) const = 0;
   virtual double CalcFinalNormMandelbrot(const cmplx &c) const = 0;
   std::function<double(const cmplx &z)> GetCouloringFunction(bool mandelbrot,
-                                                            int orbit_trap);
+                                                             int orbit_trap);
   static dbltype kEps;
 };
 
@@ -157,7 +156,7 @@ class Family00 : public Fractal {
   cmplx c_;
   dbltype q_;
 
-public:
+ public:
   void Init(const FractalParameters &p) override final;
   virtual double CalcEscapeJulia(const cmplx &z) const override final;
   virtual double CalcEscapeMandelbrot(const cmplx &c) const override final;
@@ -168,7 +167,7 @@ public:
 class Family01 : public Fractal {
   cmplx c_;
 
-public:
+ public:
   void Init(const FractalParameters &p) override final;
   virtual double CalcEscapeJulia(const cmplx &z) const override final;
   virtual double CalcFinalNormJulia(const cmplx &z) const override final;
@@ -181,14 +180,14 @@ class Family02 : public Fractal {
   int n_;
   std::function<void(dbltype &, dbltype &)> funct_;
 
-public:
+ public:
   void Init(const FractalParameters &p) override final;
   virtual double CalcEscapeJulia(const cmplx &z) const override final;
   virtual double CalcFinalNormJulia(const cmplx &z) const override final;
   virtual double CalcEscapeMandelbrot(const cmplx &c) const override final;
   virtual double CalcFinalNormMandelbrot(const cmplx &c) const override final;
 
-  static void FastPow1Inline(dbltype &, dbltype &){};
+  static void FastPow1Inline(dbltype &, dbltype &) {};
   static void FastPow2Inline(dbltype &x, dbltype &y);
   static void FastPow3Inline(dbltype &x, dbltype &y);
   static void FastPow4Inline(dbltype &x, dbltype &y);
@@ -203,7 +202,7 @@ class Family03 : public Fractal {
   std::function<void(dbltype &, dbltype &)> funct_;
   dbltype alpha_;
 
-public:
+ public:
   void Init(const FractalParameters &p) override final;
   virtual double CalcEscapeJulia(const cmplx &z) const override final;
   virtual double CalcFinalNormJulia(const cmplx &z) const override final;
@@ -217,7 +216,7 @@ class Family04 : public Fractal {
   std::function<void(dbltype &, dbltype &)> funct_;
   dbltype alpha_;
 
-public:
+ public:
   void Init(const FractalParameters &p) override final;
   virtual double CalcEscapeJulia(const cmplx &z) const override final;
   virtual double CalcFinalNormJulia(const cmplx &z) const override final;
@@ -225,4 +224,4 @@ public:
   virtual double CalcFinalNormMandelbrot(const cmplx &c) const override final;
 };
 
-#endif // FRACTALS_H
+#endif  // FRACTALS_H

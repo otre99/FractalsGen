@@ -1,7 +1,7 @@
-#include "fractals.h"
 #include <functional>
 #include <limits>
-#include <numeric>
+
+#include "fractals.h"
 
 void Family02::FastPow2Inline(dbltype &x, dbltype &y) {
   dbltype x2 = x * x;
@@ -57,25 +57,25 @@ void Family02::Init(const FractalParameters &p) {
   n_ = p.n;
 
   switch (n_) {
-  case 3:
-    funct_ = std::bind(Family02::FastPow3Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 4:
-    funct_ = std::bind(Family02::FastPow4Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 5:
-    funct_ = std::bind(Family02::FastPow5Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 6:
-    funct_ = std::bind(Family02::FastPow6Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  default:
-    funct_ = std::bind(Family02::FastPowNInline, std::placeholders::_1,
-                       std::placeholders::_2, n_);
+    case 3:
+      funct_ = std::bind(Family02::FastPow3Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 4:
+      funct_ = std::bind(Family02::FastPow4Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 5:
+      funct_ = std::bind(Family02::FastPow5Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 6:
+      funct_ = std::bind(Family02::FastPow6Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    default:
+      funct_ = std::bind(Family02::FastPowNInline, std::placeholders::_1,
+                         std::placeholders::_2, n_);
   }
 }
 
@@ -86,8 +86,7 @@ double Family02::CalcFinalNormMandelbrot(const cmplx &c) const {
   dbltype dist = std::numeric_limits<double>::max();
   for (; iter < max_iter_; ++iter) {
     dist = std::min(orbit_metric_funct_(x, y), dist);
-    if (x * x + y * y >= th_norm_)
-      break;
+    if (x * x + y * y >= th_norm_) break;
     funct_(x, y);
     x += c.real();
     y += c.imag();
@@ -102,8 +101,7 @@ double Family02::CalcFinalNormJulia(const cmplx &z) const {
   dbltype dist = std::numeric_limits<dbltype>::max();
   for (; iter < max_iter_; ++iter) {
     dist = std::min(orbit_metric_funct_(x, y), dist);
-    if (x * x + y * y >= th_norm_)
-      break;
+    if (x * x + y * y >= th_norm_) break;
 
     funct_(x, y);
     x += c_.real();
@@ -119,8 +117,7 @@ double Family02::CalcEscapeJulia(const cmplx &z) const {
   dbltype y = z.imag();
 
   for (;;) {
-    if (x * x + y * y >= th_norm_ || iter >= max_iter_)
-      break;
+    if (x * x + y * y >= th_norm_ || iter >= max_iter_) break;
     funct_(x, y);
     x += c_.real();
     y += c_.imag();
@@ -134,8 +131,7 @@ double Family02::CalcEscapeMandelbrot(const cmplx &c) const {
   dbltype x = c_.real();
   dbltype y = c_.imag();
   for (;;) {
-    if (x * x + y * y >= th_norm_ || iter >= max_iter_)
-      break;
+    if (x * x + y * y >= th_norm_ || iter >= max_iter_) break;
     funct_(x, y);
     x += c.real();
     y += c.imag();

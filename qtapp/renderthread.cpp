@@ -1,5 +1,6 @@
-#include <execution>
+#include <execution> //NOTE(otre99): There seems to be a problem when this header is not the first one
 #include "renderthread.h"
+
 #include <QDebug>
 #include <algorithm>
 #include <cmath>
@@ -32,8 +33,7 @@ void RenderThread::render(const FractalParameters &params) {
 
 void RenderThread::run() {
   forever {
-    if (abort)
-      break;
+    if (abort) break;
 
     mutex.lock();
     FractalParameters local_params = fractal_parameters_;
@@ -41,37 +41,37 @@ void RenderThread::run() {
 
     std::function<float(const cmplx &z)> f;
     switch (local_params.fractal_family) {
-    case 0:
-      family00.Init(local_params);
-      f = family00.GetCouloringFunction(local_params.mandelbrot,
-                                        local_params.orbit_trap);
-      break;
-    case 1:
-      family01.Init(local_params);
-      f = family01.GetCouloringFunction(local_params.mandelbrot,
-                                        local_params.orbit_trap);
-      break;
-    case 2:
-      family02.Init(local_params);
-      f = family02.GetCouloringFunction(local_params.mandelbrot,
-                                        local_params.orbit_trap);
-      break;
-    case 3:
-      family03.Init(local_params);
-      f = family03.GetCouloringFunction(local_params.mandelbrot,
-                                        local_params.orbit_trap);
-      break;
-    case 4:
-      family04.Init(local_params);
-      f = family04.GetCouloringFunction(local_params.mandelbrot,
-                                        local_params.orbit_trap);
-      break;
-    default:
-      qErrnoWarning(
-          "Wrong fractal family number. Expected [0,1,2,3,4], but get %d",
-          local_params.fractal_family);
-      continue;
-      break;
+      case 0:
+        family00.Init(local_params);
+        f = family00.GetCouloringFunction(local_params.mandelbrot,
+                                          local_params.orbit_trap);
+        break;
+      case 1:
+        family01.Init(local_params);
+        f = family01.GetCouloringFunction(local_params.mandelbrot,
+                                          local_params.orbit_trap);
+        break;
+      case 2:
+        family02.Init(local_params);
+        f = family02.GetCouloringFunction(local_params.mandelbrot,
+                                          local_params.orbit_trap);
+        break;
+      case 3:
+        family03.Init(local_params);
+        f = family03.GetCouloringFunction(local_params.mandelbrot,
+                                          local_params.orbit_trap);
+        break;
+      case 4:
+        family04.Init(local_params);
+        f = family04.GetCouloringFunction(local_params.mandelbrot,
+                                          local_params.orbit_trap);
+        break;
+      default:
+        qErrnoWarning(
+            "Wrong fractal family number. Expected [0,1,2,3,4], but get %d",
+            local_params.fractal_family);
+        continue;
+        break;
     }
 
     //        qDebug() << "Start rendering ...";
@@ -103,8 +103,7 @@ void RenderThread::run() {
 
     std::for_each(std::execution::par_unseq, indexs.begin(), indexs.end(),
                   [&](int i) {
-                    if (this->restart)
-                      return;
+                    if (this->restart) return;
                     double *d = &data[i * W];
                     dbltype yy = centerY + (i - H / 2) * scaleFactor;
                     for (int k = -W / 2; k < W / 2; ++k) {
@@ -116,8 +115,7 @@ void RenderThread::run() {
       emit renderedImage(data, local_params.image_size, local_params.scale);
     }
     mutex.lock();
-    if (!restart)
-      condition.wait(&mutex);
+    if (!restart) condition.wait(&mutex);
     restart = false;
     mutex.unlock();
   }

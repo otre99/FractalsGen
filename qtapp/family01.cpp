@@ -1,8 +1,8 @@
-#include "fractals.h"
 #include <QDebug>
 #include <functional>
 #include <limits>
-#include <numeric>
+
+#include "fractals.h"
 
 void Family01::Init(const FractalParameters &p) {
   Fractal::Init(p);
@@ -24,8 +24,7 @@ double Family01::CalcFinalNormMandelbrot(const cmplx &c) const {
     x *= x;
     y *= y;
     dist = std::min(orbit_metric_funct_(tmp1, tmp2), dist);
-    if (x + y >= th_norm_)
-      break;
+    if (x + y >= th_norm_) break;
     x += -y + c.real();
     y = 2 * tmp1 * tmp2 + c.imag();
   }
@@ -47,8 +46,7 @@ double Family01::CalcFinalNormJulia(const cmplx &z) const {
     x *= x;
     y *= y;
     dist = std::min(orbit_metric_funct_(tmp1, tmp2), dist);
-    if (x + y >= th_norm_)
-      break;
+    if (x + y >= th_norm_) break;
 
     x += -y + c_.real();
     y = 2 * tmp1 * tmp2 + c_.imag();
@@ -70,8 +68,7 @@ double Family01::CalcEscapeJulia(const cmplx &z) const {
     tmp2 = y;
     x *= x;
     y *= y;
-    if (x + y >= th_norm_ || iter >= max_iter_)
-      break;
+    if (x + y >= th_norm_ || iter >= max_iter_) break;
     x += -y + c_.real();
     y = 2 * tmp1 * tmp2 + c_.imag();
     ++iter;
@@ -94,8 +91,7 @@ double Family01::CalcEscapeMandelbrot(const cmplx &c) const {
     x *= x;
     y *= y;
     // qDebug() << "AA" << double(x+y) << iter ;
-    if (x + y >= th_norm_ || iter >= max_iter_)
-      break;
+    if (x + y >= th_norm_ || iter >= max_iter_) break;
     x += -y + c.real();
     y = 2 * tmp1 * tmp2 + c.imag();
     ++iter;

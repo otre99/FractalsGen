@@ -1,9 +1,11 @@
 #include "display_widget.h"
+
+#include <math.h>
+
 #include <QDebug>
 #include <QGesture>
 #include <QKeyEvent>
 #include <QPainter>
-#include <math.h>
 
 const double DefaultCenterX = -0.637011;
 const double DefaultCenterY = -0.0395159;
@@ -13,9 +15,35 @@ const double ZoomInFactor = 0.8;
 const double ZoomOutFactor = 1 / ZoomInFactor;
 const int ScrollStep = 20;
 
+QPixmap DisplayWidget::ImageData::GenPixmap(ColorMapper &cmap, bool useLog,
+                                            bool calc_bound, double offset) {
+  if (data.empty()) return {};
+  if (calc_bound) {
+    minVal = std::numeric_limits<double>::max();
+    maxVal = std::numeric_limits<double>::min();
+    for (const auto &v : std::as_const(data)) {
+      minVal = std::min(minVal, v);
+      maxVal = std::max(maxVal, v);
+    }
+  }
+
+  QImage image(size, QImage::Format_ARGB32);
+  int dim = size.width();
+
+  const double o = (maxVal - minVal) * offset;
+  for (int i = 0; i < image.height(); ++i) {
+    cmap.colorize(data.data() + i * dim, minVal + o, maxVal + o,
+                  reinterpret_cast<QRgb *>(image.scanLine(i)), dim, 1, useLog);
+  }
+  return QPixmap::fromImage(image);
+}
+
 DisplayWidget::DisplayWidget(QWidget *parent)
-    : QWidget(parent), centerX(DefaultCenterX), centerY(DefaultCenterY),
-      pixmapScale(DefaultScale), curScale(DefaultScale) {
+    : QWidget(parent),
+      centerX(DefaultCenterX),
+      centerY(DefaultCenterY),
+      pixmapScale(DefaultScale),
+      curScale(DefaultScale) {
   connect(&thread, &RenderThread::renderedImage, this,
           &DisplayWidget::updatePixmap);
 #if QT_CONFIG(cursor)
@@ -24,8 +52,9 @@ DisplayWidget::DisplayWidget(QWidget *parent)
 
   setColorMap(ColorMapper::gpGrayscale);
   setLogScale(false);
-  help = tr("Zoom with mouse wheel, +/- keys or pinch.  Scroll with arrow keys "
-            "or by dragging.");
+  help =
+      tr("Zoom with mouse wheel, +/- keys or pinch.  Scroll with arrow keys "
+         "or by dragging.");
 }
 
 void DisplayWidget::Reset() {
@@ -34,6 +63,33 @@ void DisplayWidget::Reset() {
   pixmapScale = DefaultScale;
   curScale = DefaultScale;
   RenderCommand();
+}
+
+void DisplayWidget::setLogScale(bool enable) {
+  if (useLog == enable) return;
+  useLog = enable;
+  pixmap = imgData.GenPixmap(colorMapper, useLog, false, colorMapOffset);
+  update();
+}
+
+void DisplayWidget::setColorMap(ColorMapper::GradientPreset p) {
+  if (p == colorMapper.preset()) return;
+  colorMapper = ColorMapper(p);
+  colorMapper.setPeriodic(true);
+  pixmap = imgData.GenPixmap(colorMapper, useLog, false, colorMapOffset);
+  update();
+}
+
+void DisplayWidget::invertColorMap(){
+    colorMapper = colorMapper.inverted();
+    pixmap = imgData.GenPixmap(colorMapper, useLog, false, colorMapOffset);
+    update();
+}
+
+void DisplayWidget::setColorMapOffset(const double &offset) {
+  colorMapOffset = offset;
+  pixmap = imgData.GenPixmap(colorMapper, useLog, false, colorMapOffset);
+  update();
 }
 
 void DisplayWidget::paintEvent(QPaintEvent * /* event */) {
@@ -101,29 +157,29 @@ void DisplayWidget::resizeEvent(QResizeEvent * /* event */) { RenderCommand(); }
 
 void DisplayWidget::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
-  case Qt::Key_Plus:
-    zoom(ZoomInFactor);
-    break;
-  case Qt::Key_Minus:
-    zoom(ZoomOutFactor);
-    break;
-  case Qt::Key_Left:
-    scroll(-ScrollStep, 0);
-    break;
-  case Qt::Key_Right:
-    scroll(+ScrollStep, 0);
-    break;
-  case Qt::Key_Down:
-    scroll(0, -ScrollStep);
-    break;
-  case Qt::Key_Up:
-    scroll(0, +ScrollStep);
-    break;
-  case Qt::Key_Q:
-    close();
-    break;
-  default:
-    QWidget::keyPressEvent(event);
+    case Qt::Key_Plus:
+      zoom(ZoomInFactor);
+      break;
+    case Qt::Key_Minus:
+      zoom(ZoomOutFactor);
+      break;
+    case Qt::Key_Left:
+      scroll(-ScrollStep, 0);
+      break;
+    case Qt::Key_Right:
+      scroll(+ScrollStep, 0);
+      break;
+    case Qt::Key_Down:
+      scroll(0, -ScrollStep);
+      break;
+    case Qt::Key_Up:
+      scroll(0, +ScrollStep);
+      break;
+    case Qt::Key_Q:
+      close();
+      break;
+    default:
+      QWidget::keyPressEvent(event);
   }
 }
 
@@ -161,11 +217,10 @@ void DisplayWidget::mouseReleaseEvent(QMouseEvent *event) {
 
 void DisplayWidget::updatePixmap(const QVector<double> &data, const QSize &size,
                                  double scaleFactor) {
-  if (!lastDragPos.isNull())
-    return;
+  if (!lastDragPos.isNull()) return;
   imgData.data = data;
   imgData.size = size;
-  pixmap = imgData.GenPixmap(colorMapper, useLog, true);
+  pixmap = imgData.GenPixmap(colorMapper, useLog, true, colorMapOffset);
   pixmapOffset = QPoint();
   lastDragPos = QPoint();
   pixmapScale = scaleFactor;
@@ -185,8 +240,8 @@ void DisplayWidget::RenderCommand() {
   fractalParams.centerY = centerY;
   fractalParams.scale = curScale;
   fractalParams.image_size = size();
-  thread.render(fractalParams); // centerX, centerY, curScale, size(),
-                                // devicePixelRatio());
+  thread.render(fractalParams);  // centerX, centerY, curScale, size(),
+                                 // devicePixelRatio());
 }
 
 void DisplayWidget::scroll(int deltaX, int deltaY) {

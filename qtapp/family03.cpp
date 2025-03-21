@@ -1,8 +1,7 @@
-#include "fractals.h"
-#include "iostream"
 #include <functional>
 #include <limits>
-#include <numeric>
+
+#include "fractals.h"
 
 dbltype reps = 1e-7;
 
@@ -13,33 +12,33 @@ void Family03::Init(const FractalParameters &p) {
   n_ = p.n;
   alpha_ = static_cast<dbltype>(n_ - 1) / n_;
   switch (n_ - 1) {
-  case 1:
-    funct_ = std::bind(Family02::FastPow1Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 2:
-    funct_ = std::bind(Family02::FastPow2Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 3:
-    funct_ = std::bind(Family02::FastPow3Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 4:
-    funct_ = std::bind(Family02::FastPow4Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 5:
-    funct_ = std::bind(Family02::FastPow5Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  case 6:
-    funct_ = std::bind(Family02::FastPow6Inline, std::placeholders::_1,
-                       std::placeholders::_2);
-    break;
-  default:
-    funct_ = std::bind(Family02::FastPowNInline, std::placeholders::_1,
-                       std::placeholders::_2, n_ - 1);
+    case 1:
+      funct_ = std::bind(Family02::FastPow1Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 2:
+      funct_ = std::bind(Family02::FastPow2Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 3:
+      funct_ = std::bind(Family02::FastPow3Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 4:
+      funct_ = std::bind(Family02::FastPow4Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 5:
+      funct_ = std::bind(Family02::FastPow5Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    case 6:
+      funct_ = std::bind(Family02::FastPow6Inline, std::placeholders::_1,
+                         std::placeholders::_2);
+      break;
+    default:
+      funct_ = std::bind(Family02::FastPowNInline, std::placeholders::_1,
+                         std::placeholders::_2, n_ - 1);
   }
 }
 
@@ -68,8 +67,7 @@ double Family03::CalcFinalNormJulia(const cmplx &z) const {
     y = y2;
     rdem = std::max(std::abs(x1 - x), std::abs(y1 - y));
     dist = std::min(dist, orbit_metric_funct_(x, y));
-    if (rdem < reps)
-      break;
+    if (rdem < reps) break;
   }
   return dist;
 }
@@ -94,8 +92,7 @@ double Family03::CalcEscapeJulia(const cmplx &z) const {
     x = x2;
     y = y2;
     rdem = std::max(std::abs(x1 - x), std::abs(y1 - y));
-    if (rdem < reps)
-      break;
+    if (rdem < reps) break;
   }
   return iter;
 }

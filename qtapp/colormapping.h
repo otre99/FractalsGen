@@ -6,7 +6,7 @@
 #include <QVector>
 
 class ColorMapper {
-public:
+ public:
   enum ColorInterpolation { ciRGB, ciHSV };
   enum GradientPreset {
     gpGrayscale,
@@ -55,7 +55,7 @@ public:
   void clearColorStops();
   ColorMapper inverted() const;
 
-protected:
+ protected:
   // property members:
   int mLevelCount;
   QMap<double, QColor> mColorStops;
@@ -63,8 +63,9 @@ protected:
   bool mPeriodic;
 
   // non-property members:
-  QVector<QRgb> mColorBuffer; // have colors premultiplied with alpha (for usage
-                              // with QImage::Format_ARGB32_Premultiplied)
+  QVector<QRgb>
+      mColorBuffer;  // have colors premultiplied with alpha (for usage
+                     // with QImage::Format_ARGB32_Premultiplied)
   bool mColorBufferInvalidated;
 
   // non-virtual methods:
@@ -72,4 +73,4 @@ protected:
   void updateColorBuffer();
 };
 
-#endif // COLORMAPPING_H
+#endif  // COLORMAPPING_H
